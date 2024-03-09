@@ -55,10 +55,10 @@ app.get("/login",(req,res)=>{
 app.get("/cita", (req, res) => {
     res.sendFile(__dirname + "/public/cita.html");
 })
-
+/*
 app.get("/login", (req, res) => {
     res.sendFile(__dirname + "/public/Login.html");
-});
+});*/
 
 app.get("/modelo",(req,res)=>{
     res.sendFile(__dirname + "/public/modeloTarjeta.html");
