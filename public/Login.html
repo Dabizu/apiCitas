@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        #consultorio {
+            /* Importante definir un width y un height para que no se vaya haciendo más pequeño al disminuir el tamaño */
+            width: 500;
+            height: 200px;
+            border-radius: 30px;
+            color: rgb(0, 141, 94);
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <h2>
+            escribe consultorio
+        </h2>
+        <input type="text" id="consultorio" >
+    </center>
+
+    <script>
+        var input = document.querySelector('#consultorio')
+        var fontSize = 100
+        // Tamaño inicial
+        input.style.fontSize = `${fontSize}px`
+
+        document.addEventListener("keyup", function(event) {
+            if (event.code === 'Enter') {
+                
+                var consultorio=document.getElementById("consultorio").value;
+                if(consultorio!=""){
+                    localStorage.setItem("consultorio",consultorio)
+                    window.location.href="/cita"
+                }else{
+                    alert('Esta vacio tu campo de texto');
+                }
+            }
+        });
+        
+        /*
+        input.addEventListener('input', () => {
+            var l = input.value.length
+            var s = (l / 5) | 0 // Disminuimos 1px cada 5 caracteres
+            input.style.fontSize = `${(fontSize - s) || 1}px`
+        })*/
+    </script>
+
+</body>
+
+</html>

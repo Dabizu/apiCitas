@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <video id="video" playsinline autoplay style="display:none;"></video>
+    <canvas id="canvas"></canvas>
+    <script>
+        window.onload = function () {
+            console.log("hola")
+        }
+        var altoCamara = 720;
+        var anchoCamara = 720;
+        var video = document.getElementById("video");
+        
+        
+        var opciones = {
+            audio: false,
+            video: {
+                width: anchoCamara, height: altoCamara
+            }
+        };
+
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia(opciones)
+                .then(function (stream) {
+                    video.srcObject = stream;
+                    //ctx.drawImage(video, 0, 0, anchoCamara, altoCamara);
+                    //procesarCamara();
+                })
+                .catch(function (err) {
+                    console.log("Oops, hubo un error", err);
+                })
+        } else {
+            console.log("No existe la funcion getUserMedia... oops :( ");
+        }
+        //mostrarCamara()
+
+       
+        /*
+        import jsQR from "jsqr";
+        const canvasElement = document.querySelector('canvas.cam-frame');
+        const ctxCanvas = canvasElement.getContext("2d", {
+            willReadFrequently: true,
+        });
+        const frameData = ctxCanvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        const code = jsQR(
+            frameData.data,
+            frameData.width,
+            frameData.height,
+            {
+                inversionAttempts: 'dontInvert'
+            }
+        );
+        console.log(code)*/
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./estilo/style.css">
+</head>
+<body>
+    <div style="border: 10px black; width: auto; height: auto; border-style: solid;">
+    
+        <div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Logotipo_del_IMSS.svg/1200px-Logotipo_del_IMSS.svg.png" alt="" style="float: left; width: 50px;"> <h3>Clinica tal</h3>
+        </div>
+        <br>
+        <div style="border: 10px black; width: auto; height: auto; border-style: solid;">
+    
+       
+            <center>
+              <div class="encabezado">Cita</div>
+            </center>
+            <div class="tarjeta">
+              <img
+                src="https://w7.pngwing.com/pngs/741/68/png-transparent-user-computer-icons-user-miscellaneous-cdr-rectangle-thumbnail.png"
+                width="100px" height="100px" alt="" id="imagen-tarjeta">
+              
+              <div id="informacion-general" style="width: auto;">
+                <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+                  <h4>Nombre:</h4><h4>${elem.nombre}</h4>
+                </div>
+                
+                <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+                  <h4>Hora:</h4><h4>${elem.hora}</h4>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+                  <h4>Sintomas:</h4><h4>${elem.descripcion}</h4>
+                </div>
+              </div>
+            </div>
+          
+    </div>
+    </div>
+</body>
+</html>

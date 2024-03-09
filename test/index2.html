@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@9.0.0/dist/dbr.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    
+    <style>
+        #barcodeScanner {
+            text-align: center;
+            font-size: medium;
+            height: 40vh;
+            width: 40vw;
+        }
+    </style>
+</head>
+
+<body>
+
+    
+    <div id="barcodeScanner">
+        <span id='loading-status' style='font-size:x-large'>Loading Library...</span>
+    </div>
+    <div id="result"></div>
+    <div id="qrcode"></div>
+    <div style="position: relative; height: 100%; width: 100%;">
+        <div id="contenedor" style="background-color: rgb(175, 169, 169); height: 90%;width: 90%; position: absolute; top: 50%; left: 50%;transform: translate(-50%, -50%);">
+            <div id="citas" style="background-color: rgb(146, 146, 228); height: 10px;width: 10px; position: relative; float: left;"></div>
+            <div id="atendidas" style="background-color: rgb(146, 146, 228); height: 10px;width: 10px; position: relative; float: left;"></div>
+        </div>
+    </div>
+    
+    
+    <script type="text/javascript">
+        Dynamsoft.DBR.BarcodeReader.license = "";
+        let scanner = null;
+        (async () => {
+            scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+            scanner.onFrameRead = results => { console.log(results); };
+            scanner.onUnduplicatedRead = (txt, result) => { };
+            scanner.onFrameRead = results => {
+                console.log(results);
+                for (let result of results) {
+                    document.getElementById('result').innerHTML = result.barcodeFormatString + ", " + result.barcodeText;
+                }
+            };
+            document.getElementById('barcodeScanner').appendChild(scanner.getUIElement());
+            document.getElementById('loading-status').hidden = true;
+            await scanner.show();
+        })();
+
+        //para crear un qr
+        var qrcode=new QRCode(document.getElementById("qrcode"),"123456")
+        /*
+        var qrcode = QRCode(document.getElementById("qrcode"), {
+            text: "http://jindo.dev.naver.com/collie",
+            width: 128,
+            height: 128,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });*/
+
+    </script>
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <div onclick="peti()" id="contenedor" name="contenedor">
+        
+        <div id="no" style="height: 500px; width: 500px; background-color: black; color:aliceblue;"><img id="codigo"/></div>
+        <script>
+            JsBarcode("#codigo", "2222");
+        </script>
+    </div>
+    <script>
+        
+        function peti() {
+            
+            console.log(document.getElementById("contenedor").innerHTML)
+            
+            var contenido=document.getElementById("contenedor").innerHTML;
+
+            //console.log(contenido.toString())
+            console.log(typeof contenido.toString())
+            var texto=contenido.toString()
+            
+            axios.post('/page?contenedor='+texto)
+                .then(function (response) {
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    </script>-->
+</body>
+
+</html>

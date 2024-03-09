@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Mostrar citados</title>
+  <script src="./scripts/artyom.window.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script type="text/javascript"
+    src="https://github.com/schmich/instascan/releases/download/1.0.0/instascan.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="./estilo/style.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <div class="w3-sidebar w3-bar-block w3-border-right" style="display:none" id="mySidebar">
+    <button onclick="w3_close()" class="w3-bar-item w3-large">Close &times;</button>
+    <a href="#" class="w3-bar-item w3-button">Link 1</a>
+    <a href="#" class="w3-bar-item w3-button">Link 2</a>
+    <a href="#" class="w3-bar-item w3-button">Link 3</a>
+    <p style="float: left; position: absolute;">Consultorio: </p>
+    <div id="consultorio" style="float: left; position: absolute;"></div>
+  </div>
+  <!-- encabezado -->
+  <div class="w3-teal">
+    <button class="w3-button w3-teal w3-xlarge" onclick="w3_open()">☰</button>
+    <div class="w3-container">
+      <h1>My Page</h1>
+    </div>
+  </div>
+  <button style="border-radius: 20px;position: absolute; float: left;" id="boton-open"
+    onclick="ocultaTarjeta()">registrar
+    cita</button>
+  
+  
+    <video id="preview"></video>
+    <div id="contenedor" class="contenedor" style="background-color: aquamarine; max-width: 1400px; max-height: 600px;">
+      <div id="contenedor-citas" class="flex-item flex1"
+        style="float: left; background-color: rgb(5, 236, 159); width: 700px; height: auto; margin: 10px;">
+      </div>
+      <div id="contenedor-atendidos" class="flex-item flex2"
+        style="float: left; background-color: rgb(79, 248, 79);width: 670px; max-height: 500px; overflow: scroll;">
+      </div>
+    </div>
+    <!--<button onclick="mandarMensaje()">enviar datos</button>-->
+
+  <!--ventana para registrar usuarios-->
+  <div class="card text-white bg-dark mb-3" id="tarjeta"
+    style="max-width: 500px; top: 25%; left: 38%; position: absolute;">
+    <div class="card-header">Registrar usuarios</div>
+    <input type="file" name="imagen" id="imagen" accept="image/*" style="width: 100px;height: 100px;"
+      placeholder="ingresa imagen">
+
+    <div class="input-group input-group-sm mb-3">
+      <span class="input-group-text" id="inputGroup-sizing-sm">No. Seguro Social</span>
+      <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <div class="input-group input-group-sm mb-3">
+      <span class="input-group-text" id="inputGroup-sizing-sm">Fecha nacimiento</span>
+      <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <h1>Dirección</h1>
+    <div class="input-group input-group-sm mb-3">
+      <span class="input-group-text" id="inputGroup-sizing-sm">Calle</span>
+      <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <div class="input-group input-group-sm mb-3">
+      <span class="input-group-text" id="inputGroup-sizing-sm">Numero</span>
+      <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <div class="input-group input-group-sm mb-3">
+      <span class="input-group-text" id="inputGroup-sizing-sm">Interior</span>
+      <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+    </div>
+
+    <button onclick="subir()">enviar</button>
+  </div>
+
+  <!--<button onclick="enviarCitados()">pasar a otra seccion</button>-->
+
+
+
+  <!--
+  <div class="tarjeta2" id="${elem.numero_seguro_social}">
+    <center>
+      <div class="encabezado">Cita</div>
+    </center>
+    <div class="tarjeta">
+      <img
+        src="https://w7.pngwing.com/pngs/741/68/png-transparent-user-computer-icons-user-miscellaneous-cdr-rectangle-thumbnail.png"
+        width="100px" height="100px" alt="" id="imagen-tarjeta">
+      
+      <div id="informacion-general" style="width: auto;">
+        <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+          <h4>Nombre:</h4><h4></h4>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+          <h4>Hora:</h4><h4></h4>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+          <h4>Sintomas:</h4><h4></h4>
+        </div>
+      </div>
+    </div>
+  </div>-->
+
+
+  <script type="text/javascript">
+    var socket = io.connect({ forceNew: true });
+    var contador = 0;
+    var array;
+
+    function llamandoPaciente(texto) {
+      //var artyom = new Artyom()
+      //artyom.fatality();
+      //console.log("estas son las voces")
+      //console.log(artyom.getVoices())
+      //artyom.setName("Microsoft Adri Online (Natural) - Afrikaans (South Africa)")
+      var artyom = new Artyom();
+
+      artyom.initialize({
+        lang: "es-ES",
+        continuous: false,// recognize 1 command and stop listening !
+        debug: true, // Show what recognizes in the Console
+        listen: true, // Start listening after this
+        speed: 0.9, // Talk a little bit slow
+        mode: "normal" // This parameter is not required as it will be normal by default
+      });
+
+      /*
+      artyom.initialize({
+        lang: "es-US",//establecemos el idioma
+        continuous: false,// recognize 1 command and stop listening !
+        listen: true, // Start recognizing
+        debug: true, // Show everything in the console
+        speed: 1, // talk normally
+        //name: "Microsoft Raul - Spanish (Mexico)"
+      }).then(function () {
+        console.log("Ready to work !");
+      });*/
+      if (artyom.speechSupported()) {
+        artyom.say(texto, {
+          onStart: function () {
+            console.log("iniciando ...");
+          },
+          onEnd: function () {
+            console.log("a terminado de hablar");
+          }
+        });
+      }
+      //artyom.say(texto);
+    }
+
+    function mostrarCitaConfirmada() {
+      console.log("numero de elemntos: " + array.length)
+      /*
+      if (array.length > 0) {
+        for (var i = 0; i < array.length; i++) {
+          if (array[i].confirmacion_cita == 1) {
+            var contenido = document.getElementById(array[i].numero_seguro_social);
+            contenido.style.backgroundColor = "rgb(129, 255, 2)";
+            contenido.style.color = "black";
+            //conso.log("ejecutado elcambio")
+          }
+        }
+      }*/
+    }
+    function render(data) {
+      if (data.length != 0) {
+        array = data;
+        var html = data
+          .map(function (elem, index) {
+            return `<div class="tarjeta2" id="${elem.numero_seguro_social}">
+                      <center>
+                        <div class="encabezado">Cita</div>
+                      </center>
+                      <div class="tarjeta">
+                        <img
+                          src="https://w7.pngwing.com/pngs/741/68/png-transparent-user-computer-icons-user-miscellaneous-cdr-rectangle-thumbnail.png"
+                          width="100px" height="100px" alt="" id="imagen-tarjeta">
+                        
+                        <div id="informacion-general" style="width: auto;">
+                          <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+                            <h4>Nombre:</h4><h4>${elem.nombre}</h4>
+                          </div>
+                          
+                          <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+                            <h4>Hora:</h4><h4>${elem.hora}</h4>
+                          </div>
+                          <div style="display: flex; flex-wrap: wrap; align-content: flex-start; width: auto;">
+                            <h4>Sintomas:</h4><h4>${elem.descripcion}</h4>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    `;
+          })
+          .join(' ');
+
+        document.getElementById("contenedor-citas").innerHTML = html;
+        enviarCitados()
+        mostrarCitaConfirmada();
+      } else {
+        var html = '<div class="card text-white bg-dark mb-3" style="width: 670px;"><h1>no hay citas el dia de hoy</h1></div>'
+        document.getElementById("contenedor-citas").innerHTML = html;
+      }
+    }
+
+    socket.on("messages", function (data) {
+      //console.log(localStorage.getItem("consultorio"))
+      //console.log(data.find(element=>element.numero_consultorio==localStorage.getItem("consultorio")));
+      console.log("numeor de elemntos dentro del evento: " + data.length)
+      document.getElementById("consultorio").innerText = localStorage.getItem("consultorio");
+      var div = document.querySelector('#consultorio')
+      var fontSize = 50
+      // Tamaño inicial
+      div.style.fontSize = `${fontSize}px`
+      var arr = []
+      arr = arr.concat(data.filter(element => element.numero_consultorio == localStorage.getItem("consultorio")))
+      render(arr);
+    });
+
+    //aqui subimos lo datos del paciente y su foto
+    function subir() {
+      //var nombreUsuario = document.getElementById('nombre').value;
+      const imagen = document.querySelector("#imagen");
+      if (imagen.files.length > 0) {
+        let formData = new FormData();
+        //formData.append("nombre_usuario", nombreUsuario);
+        formData.append("archivo", imagen.files[0]); // En la posición 0; es decir, el primer elemento
+
+        fetch("/subirImagen", {
+          method: 'POST',
+          body: formData,
+        })
+          .then(respuesta => respuesta.text())
+          .then(decodificado => {
+            console.log(decodificado);
+          });
+        alert("Archivo enviado");
+      } else {
+        // El usuario no ha seleccionado archivos
+        alert("Selecciona un archivo");
+      }
+    }
+
+    //este metodo manda el numero al servidor
+    function setNumeroSeguro(cadena) {
+      let passiveSupported = false;
+
+      try {
+        const options = {
+          get passive() {
+
+            socket.emit("rest", cadena)
+            console.log("se ejecuto")
+            mostrarCitaConfirmada()
+            // This function will be called when the browser
+            // attempts to access the passive property.
+            passiveSupported = true;
+            return false;
+          },
+        };
+
+        window.addEventListener("test", null, options);
+        window.removeEventListener("test", null, options);
+      } catch (err) {
+        passiveSupported = false;
+      }
+    }
+
+
+    /*
+    function mandarMensaje() {
+      var data = {
+        nombre: "david",
+        descripcion: "hola gato",
+        imagen: "https://w7.pngwing.com/pngs/741/68/png-transparent-user-computer-icons-user-miscellaneous-cdr-rectangle-thumbnail.png",
+        hora: "14:30",
+        fecha: "1/5/2023",
+        numero_seguro_social: "buwy323223",
+        confirmacion_cita: 0
+      };
+      axios.post('/entrada', data)
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      //socket.emit("entrada", mensaje);
+    }*/
+
+    //socket.emit("res",[{data:"hola"}])
+    const args = { video: document.getElementById('preview'), scanPeriod: 10, mirror: false };
+    window.URL.createObjectURL = (stream) => {
+      args.video.srcObject = stream;
+      return stream;
+    };
+    let scanner = new Instascan.Scanner(args);
+
+    scanner.addListener('scan', function (content) {
+      console.log(content);
+      console.log("cantidad de elementos")
+      console.log(array.find(element => element.numero_seguro_social == content))
+      var resultado = array.find(element => element.numero_seguro_social == content)
+      console.log("numero: " + resultado != null)
+      if (resultado != null) {
+        var elem = document.getElementById(resultado.numero_seguro_social);
+        elem.style.backgroundColor = "rgb(129, 255, 2)";
+        //.cssText("background-color: chartreuse; color: black;");
+        setNumeroSeguro(content)
+      } else {
+        console.log("no se necontro ningun registro");
+      }
+    });
+    Instascan.Camera.getCameras().then(function (cameras) {
+      if (cameras.length > 0) {
+        scanner.start(cameras[0]);
+      } else {
+        console.error('No cameras found.');
+      }
+    }).catch(function (e) {
+      console.error(e);
+    });
+
+
+
+
+
+
+    function enviarCitados() {
+      console.log("elementos dentro de la funcion enviar citas")
+      //console.log(array)
+      /*
+      var contenedor=document.getElementById("contenedor-citas").innerHTML;
+      console.log("elementos: "+contenedor.toString())*/
+      //if()
+
+      if (array.length > contador) {
+        setTimeout(() => {
+          var date = new Date();
+
+          console.log("hora: " + date.getHours() + ":" + date.getMinutes());
+          //establecer si ya fueron atendidos o no (esta funcion es por si se va la luz) y al momento de encerder y iniciar el servidor pueda seguir con su proceso correctamente
+          if (array[contador].confirmacion_cita == 1 && array[contador].cita_realizada == 0) {
+            console.log("entro confirmacion")
+
+            //estableciendo hora
+            if (array[contador].hora === date.getHours() + ":" + date.getMinutes()) {
+              console.log("entro hora")
+              var contenido = document.getElementById(array[contador].numero_seguro_social);
+              console.log(contenido)
+              //var hijo=document.getElementById("hijo");
+              //artyom.say("Que pase " + array[contador++].nombre);
+              llamandoPaciente("Que pase " + array[contador++].nombre)
+              setTimeout(() => {
+                contenido.style.cssText = "animation: moverCuadro 2s;";
+                setTimeout(() => {
+                  contenido.style.cssText = ""
+                  document.getElementById("contenedor-atendidos").append(contenido);
+                  enviarCitados();
+                }, 2000);
+              }, 15 * 1000);
+            } else {
+              enviarCitados()
+            }
+          }
+          //document.getElementById("contenedor-atendidos").innerHTML=contenido
+
+          //document.getElementById("contenedor-atendidos").appendChild(document.getElementById(array[contador++].numero_seguro_social))
+        }, 1000);
+
+      } else {
+
+        var html = '<div class="card text-white bg-dark mb-3" style="width: 670px;"><h1>Ya no hay mas citas</h1></div>'
+        document.getElementById("contenedor-citas").innerHTML = html;
+      }
+    }
+
+    //artyom.say("Que pase el señor Ramon")
+    /*
+    var scroll = document.querySelector("#contenedor-citas")
+    console.log("esto es el scroll")
+    console.log(scroll.scrollTop)*/
+
+    /*
+    function escalandoContenedor(){
+      document.getElementById("contenedor-citas").style.cssText="animation: scaLarPanel 2s;"
+      document.getElementById("contenedor-atendidos").style.cssText="animation: scaLarPanel 2s;"
+    }
+    escalandoContenedor()*/
+  </script>
+
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+</body>
+
+<script>
+  var tarjeta = document.getElementById("tarjeta");
+  tarjeta.style.display = "none";
+  function ocultaTarjeta() {
+    if (tarjeta.style.display === "none") {
+      tarjeta.style.display = "block";
+
+    }
+    //tarjeta.style.transform="scale(0)";
+  }
+  //ocultaTarjeta()
+
+
+  function w3_open() {
+    document.getElementById("mySidebar").style.display = "block";
+  }
+
+  function w3_close() {
+    document.getElementById("mySidebar").style.display = "none";
+  }
+</script>
+
+</html>
+
+<!--<div class="card text-white bg-dark mb-3" style="width: 670px; id="${elem.numero_seguro_social}">
+                      <div class="card-header">Cita</div>
+
+                        <div class="container text-center">
+                        <div class="row">
+                          <div class="col-sm-3">
+                            <img src="${elem.imagen}" alt="" style="width: 100px;height: 100px;">
+                          </div>
+                          <div class="col-sm-9">
+                            <div class="row">
+                              <div class="col-8 col-sm-6" style="width:auto;">
+                                <h5 class="card-title">Nombre: ${elem.nombre}</h5>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-8 col-sm-6" style="width:auto;">
+                                <h5 class="card-title">hora: ${elem.hora}</h5>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="card-body">
+                                <p class="card-text">Sintomas: ${elem.descripcion}</p>
+                              </div>
+                              </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>-->
